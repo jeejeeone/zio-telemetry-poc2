@@ -1,0 +1,33 @@
+package com.example.telemetry
+
+import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter
+import io.opentelemetry.sdk.OpenTelemetrySdk
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.sdk.trace.SdkTracerProvider
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes
+import zio._
+
+object JaegerTracer {
+  def live: ULayer[Tracer] =
+    ZLayer {
+      (for {
+        spanExporter   <- ZIO.attempt(JaegerGrpcSpanExporter.builder().build())
+        spanProcessor  <- ZIO.succeed(SimpleSpanProcessor.create(spanExporter))
+        tracerProvider <-
+          ZIO
+            .attempt(
+              SdkTracerProvider
+                .builder()
+                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "example-app")))
+                .addSpanProcessor(spanProcessor)
+                .build()
+            )
+        openTelemetry  <- ZIO.succeed(OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).build())
+        tracer         <- ZIO.succeed(openTelemetry.getTracer("zio.telemetry.opentelemetry.example.JaegerTracer"))
+      } yield tracer).orDie
+    }
+
+}
