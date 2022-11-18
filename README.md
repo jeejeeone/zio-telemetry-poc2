@@ -3,6 +3,13 @@
 Simply adding opentelemetry java agent will render span hello-fetch outside of hello trace in jaeger.
 Furthermore traces from autoinstrumentation are not included in root span. Remove java agent to compare results.
 
+Trace without opentelemetry agent:
+![traces](https://github.com/jeejeeone/zio-telemetry-poc2/blob/main/without-autoinstrumentation-traces.png?raw=true)
+![trace detail](https://github.com/jeejeeone/zio-telemetry-poc2/blob/main/without-autoinstrumentation-trace-detail.png?raw=true)
+
+Trace with opentelemetry agent:
+![traces](https://github.com/jeejeeone/zio-telemetry-poc2/blob/main/autoinstrumentation-traces.png?raw=true)
+
 Reproduce:
 
 - Run jaeger
